@@ -5,6 +5,11 @@ import { Sweet } from '../entities/Sweet';
 import dotenv from 'dotenv';
 dotenv.config();
 
+// Validate DATABASE_URL exists
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL is not defined in environment variables');
+}
+
 export const AppDataSource = new DataSource({
   type: 'postgres',
   url: process.env.DATABASE_URL,
@@ -13,7 +18,12 @@ export const AppDataSource = new DataSource({
   entities: [User, Sweet],
   migrations: ['src/migrations/**/*.ts'],
   subscribers: ['src/subscribers/**/*.ts'],
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+  extra: {
+    connectionTimeoutMillis: 10000, // 10 second timeout
+  },
 });
 
 export const initializeDatabase = async (): Promise<void> => {

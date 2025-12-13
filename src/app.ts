@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { initializeDatabase } from './database/dataSource';
 import { errorMiddleware } from './middleware/error.middleware';
+import authRoutes from './routes/auth.routes';
 
 dotenv.config();
 
@@ -20,10 +21,8 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Sweet Shop API is running' });
 });
 
-// Routes (to be added in next phases)
-// app.use('/api/auth', authRoutes);
-// app.use('/api/sweets', sweetsRoutes);
-// app.use('/api/sweets', inventoryRoutes);
+// Routes
+app.use('/api/auth', authRoutes);
 
 // Error handling middleware (must be last)
 app.use(errorMiddleware);
@@ -41,6 +40,9 @@ const startServer = async () => {
   }
 };
 
-startServer();
+// Only start server if this file is run directly (not when imported in tests)
+if (require.main === module) {
+  startServer();
+}
 
 export default app;
