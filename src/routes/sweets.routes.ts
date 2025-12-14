@@ -27,6 +27,13 @@ router.get(
   sweetsController.search
 );
 
+// Add this route BEFORE /:id routes (order matters!)
+router.get(
+  '/:id',
+  authMiddleware,
+  sweetsController.getById
+);
+
 router.put(
   '/:id',
   authMiddleware,

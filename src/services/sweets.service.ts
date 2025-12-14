@@ -71,6 +71,18 @@ export class SweetsService {
     return await queryBuilder.getMany();
   }
 
+  async getById(id: string): Promise<Sweet> {
+    const sweet = await this.sweetRepository.findOne({
+      where: { id },
+    });
+
+    if (!sweet) {
+      throw new Error('Sweet not found');
+    }
+
+    return sweet;
+  }
+
   async update(id: string, updateSweetDto: UpdateSweetDto): Promise<Sweet> {
     // Find the sweet
     const sweet = await this.sweetRepository.findOne({

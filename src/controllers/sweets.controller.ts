@@ -66,6 +66,28 @@ export class SweetsController {
     }
   };
 
+  getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const sweet = await this.sweetsService.getById(id);
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Sweet retrieved successfully',
+        data: { sweet },
+      });
+    } catch (error: any) {
+      if (error.message === 'Sweet not found') {
+        res.status(404).json({
+          status: 'error',
+          message: error.message,
+        });
+      } else {
+        next(error);
+      }
+    }
+  };
+
   update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
