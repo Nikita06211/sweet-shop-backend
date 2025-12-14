@@ -278,7 +278,8 @@ Authorization: Bearer <token>
   "name": "Chocolate Bar",
   "category": "Chocolate",
   "price": 2.50,
-  "quantity": 100
+  "quantity": 100,
+  "imageUrl": "https://example.com/images/chocolate-bar.jpg"
 }
 ```
 
@@ -294,6 +295,7 @@ Authorization: Bearer <token>
       "category": "Chocolate",
       "price": 2.50,
       "quantity": 100,
+      "imageUrl": "https://example.com/images/chocolate-bar.jpg",
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2024-01-01T00:00:00.000Z"
     }
@@ -329,6 +331,7 @@ Authorization: Bearer <token>
         "category": "Chocolate",
         "price": 2.50,
         "quantity": 100,
+        "imageUrl": "https://example.com/images/chocolate-bar.jpg",
         "createdAt": "2024-01-01T00:00:00.000Z",
         "updatedAt": "2024-01-01T00:00:00.000Z"
       }
@@ -370,6 +373,7 @@ Authorization: Bearer <token>
         "category": "Chocolate",
         "price": 2.50,
         "quantity": 100,
+        "imageUrl": "https://example.com/images/chocolate-bar.jpg",
         "createdAt": "2024-01-01T00:00:00.000Z",
         "updatedAt": "2024-01-01T00:00:00.000Z"
       }
@@ -398,7 +402,8 @@ Authorization: Bearer <token>
   "name": "Updated Chocolate Bar",
   "category": "Premium Chocolate",
   "price": 3.00,
-  "quantity": 150
+  "quantity": 150,
+  "imageUrl": "https://example.com/images/chocolate-bar.jpg"
 }
 ```
 
@@ -414,6 +419,7 @@ Authorization: Bearer <token>
       "category": "Premium Chocolate",
       "price": 3.00,
       "quantity": 150,
+      "imageUrl": "https://example.com/images/chocolate-bar.jpg",
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2024-01-01T00:00:00.000Z"
     }
@@ -482,6 +488,7 @@ Authorization: Bearer <token>
       "category": "Chocolate",
       "price": 2.50,
       "quantity": 95,
+      "imageUrl": "https://example.com/images/chocolate-bar.jpg",
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2024-01-01T00:00:00.000Z"
     }
@@ -524,6 +531,7 @@ Authorization: Bearer <admin-token>
       "category": "Chocolate",
       "price": 2.50,
       "quantity": 150,
+      "imageUrl": "https://example.com/images/chocolate-bar.jpg",
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2024-01-01T00:00:00.000Z"
     }
