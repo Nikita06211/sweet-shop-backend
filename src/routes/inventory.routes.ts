@@ -17,8 +17,8 @@ router.post(
 
 router.post(
   '/:id/restock',
-  authMiddleware,
-  adminMiddleware,
+  authMiddleware,      // Must be authenticated first
+  adminMiddleware,     // Then check if admin
   validateDto(RestockSweetDto),
   inventoryController.restock
 );
