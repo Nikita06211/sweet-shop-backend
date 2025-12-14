@@ -25,5 +25,15 @@ export const verifyToken = (token: string): JwtPayload => {
     throw new Error('JWT_SECRET is not defined in environment variables');
   }
 
-  return jwt.verify(token, secret) as JwtPayload;
+  try {
+    return jwt.verify(token, secret) as JwtPayload;
+  } catch (error: any) {
+    if (error.name === 'TokenExpiredError') {
+      throw new Error('Token has expired');
+    } else if (error.name === 'JsonWebTokenError') {
+      throw new Error('Invalid token');
+    } else {
+      throw new Error('Token verification failed');
+    }
+  }
 };
