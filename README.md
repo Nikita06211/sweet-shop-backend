@@ -2,6 +2,8 @@
 
 A full-stack Sweet Shop Management System built with Node.js, TypeScript, Express, TypeORM, and PostgreSQL (NeonDB). This project demonstrates RESTful API development, JWT authentication, role-based access control, and test-driven development (TDD) practices.
 
+**Frontend Repository:** [sweet-shop-frontend](https://github.com/Nikita06211/sweet-shop-frontend)
+
 ## Table of Contents
 
 - [Project Overview](#project-overview)
@@ -42,8 +44,9 @@ The Sweet Shop Management System is a comprehensive backend API that allows user
 
 ### Sweets Management
 - Create, read, update, and delete sweets
+- Get individual sweet by ID
 - Search sweets by multiple criteria
-- Each sweet has: name, category, price, and quantity
+- Each sweet has: name, category, price, quantity, and optional imageUrl
 
 ### Inventory Management
 - Purchase sweets (decreases quantity)
@@ -345,7 +348,42 @@ Authorization: Bearer <token>
 
 ---
 
-#### 5. Search Sweets
+#### 5. Get Sweet by ID
+
+**GET** `/api/sweets/:id`
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response (200 OK):**
+```json
+{
+  "status": "success",
+  "message": "Sweet retrieved successfully",
+  "data": {
+    "sweet": {
+      "id": "uuid",
+      "name": "Chocolate Bar",
+      "category": "Chocolate",
+      "price": 2.50,
+      "quantity": 100,
+      "imageUrl": "https://example.com/images/chocolate-bar.jpg",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    }
+  }
+}
+```
+
+**Error Responses:**
+- `401 Unauthorized`: Missing or invalid token
+- `404 Not Found`: Sweet not found
+
+---
+
+#### 6. Search Sweets
 
 **GET** `/api/sweets/search?name=chocolate&category=Chocolate&minPrice=1.00&maxPrice=5.00`
 
@@ -387,7 +425,7 @@ Authorization: Bearer <token>
 
 ---
 
-#### 6. Update Sweet
+#### 7. Update Sweet
 
 **PUT** `/api/sweets/:id`
 
@@ -434,7 +472,7 @@ Authorization: Bearer <token>
 
 ---
 
-#### 7. Delete Sweet
+#### 8. Delete Sweet
 
 **DELETE** `/api/sweets/:id`
 
@@ -460,7 +498,7 @@ Authorization: Bearer <admin-token>
 
 ### Inventory Endpoints
 
-#### 8. Purchase Sweet
+#### 9. Purchase Sweet
 
 **POST** `/api/sweets/:id/purchase`
 
@@ -503,7 +541,7 @@ Authorization: Bearer <token>
 
 ---
 
-#### 9. Restock Sweet
+#### 10. Restock Sweet
 
 **POST** `/api/sweets/:id/restock`
 
@@ -549,7 +587,7 @@ Authorization: Bearer <admin-token>
 
 ### Health Check
 
-#### 10. Health Check
+#### 11. Health Check
 
 **GET** `/health`
 
