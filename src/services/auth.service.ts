@@ -13,10 +13,12 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto): Promise<{ user: User; token: string }> {
-    // Check if user already exists
-    const existingUser = await this.userRepository.findOne({
-      where: { email: registerDto.email },
-    });
+    // Use query builder for more reliable duplicate check
+    const existingUser = await AppDataSource
+      .getRepository(User)
+      .createQueryBuilder('user')
+      .where('user.email = :email', { email: registerDto.email })
+      .getOne();
 
     if (existingUser) {
       throw new Error('User with this email already exists');
@@ -33,24 +35,40 @@ export class AuthService {
       role: UserRole.USER,
     });
 
-    // Save user to database
-    const savedUser = await this.userRepository.save(user);
+    try {
+      // Save user to database
+      const savedUser = await this.userRepository.save(user);
 
-    // Generate JWT token
-    const payload: JwtPayload = {
-      userId: savedUser.id,
-      email: savedUser.email,
-      role: savedUser.role,
-    };
-    const token = generateToken(payload);
+      // Generate JWT token
+      const payload: JwtPayload = {
+        userId: savedUser.id,
+        email: savedUser.email,
+        role: savedUser.role,
+      };
+      const token = generateToken(payload);
 
-    // Remove password from user object before returning
-    const { password, ...userWithoutPassword } = savedUser;
+      // Remove password from user object before returning
+      const { password, ...userWithoutPassword } = savedUser;
 
-    return {
-      user: userWithoutPassword as User,
-      token,
-    };
+      return {
+        user: userWithoutPassword as User,
+        token,
+      };
+    } catch (error: any) {
+      // Handle database unique constraint violation (PostgreSQL error code 23505)
+      if (error.code === '23505') {
+        throw new Error('User with this email already exists');
+      }
+      
+      if (error.message?.toLowerCase().includes('duplicate') ||
+          error.message?.toLowerCase().includes('unique') ||
+          error.message?.toLowerCase().includes('already exists') ||
+          error.detail?.toLowerCase().includes('already exists')) {
+        throw new Error('User with this email already exists');
+      }
+      
+      throw error;
+    }
   }
 
   async login(loginDto: LoginDto): Promise<{ user: User; token: string }> {

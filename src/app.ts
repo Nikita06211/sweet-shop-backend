@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { initializeDatabase } from './database/dataSource';
 import { errorMiddleware } from './middleware/error.middleware';
 import authRoutes from './routes/auth.routes';
+import sweetsRoutes from './routes/sweets.routes';
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.get('/health', (req, res) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/sweets', sweetsRoutes);
 
 // Error handling middleware (must be last)
 app.use(errorMiddleware);

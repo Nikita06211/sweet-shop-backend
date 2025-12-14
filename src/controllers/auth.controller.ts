@@ -20,10 +20,11 @@ export class AuthController {
         data: result,
       });
     } catch (error: any) {
-      if (error.message === 'User with this email already exists') {
+      if (error.message === 'User with this email already exists' || 
+          error.message?.includes('already exists')) {
         res.status(409).json({
           status: 'error',
-          message: error.message,
+          message: 'User with this email already exists',
         });
       } else {
         next(error);

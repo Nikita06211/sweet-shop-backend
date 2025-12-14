@@ -103,6 +103,9 @@ describe('Auth API - Registration', () => {
         .send(userData)
         .expect(201);
 
+      // Small delay to ensure transaction is committed
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       // Try to register with same email
       const response = await request(app)
         .post('/api/auth/register')
