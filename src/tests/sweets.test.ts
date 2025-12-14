@@ -574,5 +574,132 @@ describe('Sweets API', () => {
       expect(response.body.message).toContain('not found');
     });
   });
+
+  describe('POST /api/sweets/:id/purchase', () => {
+    let testSweet: Sweet;
+
+    beforeEach(async () => {
+      // Create a test sweet with stock
+      const sweetRepository = AppDataSource.getRepository(Sweet);
+      await sweetRepository.clear();
+      
+      testSweet = sweetRepository.create({
+        name: 'Chocolate Bar',
+        category: 'Chocolate',
+        price: 2.50,
+        quantity: 100, // Initial stock
+      });
+      await sweetRepository.save(testSweet);
+    });
+
+    it('should purchase sweet successfully and decrease quantity', async () => {
+      const purchaseData = {
+        quantity: 5,
+      };
+
+      const response = await request(app)
+        .post(`/api/sweets/${testSweet.id}/purchase`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(purchaseData)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('status', 'success');
+      expect(response.body).toHaveProperty('message');
+      expect(response.body.data).toHaveProperty('sweet');
+      expect(response.body.data.sweet).toHaveProperty('quantity', 95); // 100 - 5
+
+      // Verify quantity was updated in database
+      const sweetRepository = AppDataSource.getRepository(Sweet);
+      const updatedSweet = await sweetRepository.findOne({
+        where: { id: testSweet.id },
+      });
+      expect(updatedSweet?.quantity).toBe(95);
+    });
+
+    it('should return 401 if user is not authenticated', async () => {
+      const purchaseData = {
+        quantity: 5,
+      };
+
+      const response = await request(app)
+        .post(`/api/sweets/${testSweet.id}/purchase`)
+        .send(purchaseData)
+        .expect(401);
+
+      expect(response.body).toHaveProperty('status', 'error');
+    });
+
+    it('should return 404 if sweet does not exist', async () => {
+      const fakeId = '00000000-0000-0000-0000-000000000000';
+      const purchaseData = {
+        quantity: 5,
+      };
+
+      const response = await request(app)
+        .post(`/api/sweets/${fakeId}/purchase`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(purchaseData)
+        .expect(404);
+
+      expect(response.body).toHaveProperty('status', 'error');
+    });
+
+    it('should return 400 if quantity is missing', async () => {
+      const response = await request(app)
+        .post(`/api/sweets/${testSweet.id}/purchase`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({})
+        .expect(400);
+
+      expect(response.body).toHaveProperty('status', 'error');
+    });
+
+    it('should return 400 if quantity is less than 1', async () => {
+      const purchaseData = {
+        quantity: 0,
+      };
+
+      const response = await request(app)
+        .post(`/api/sweets/${testSweet.id}/purchase`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(purchaseData)
+        .expect(400);
+
+      expect(response.body).toHaveProperty('status', 'error');
+    });
+
+    it('should return 400 if insufficient stock', async () => {
+      const purchaseData = {
+        quantity: 150, // More than available (100)
+      };
+
+      const response = await request(app)
+        .post(`/api/sweets/${testSweet.id}/purchase`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(purchaseData)
+        .expect(400);
+
+      expect(response.body).toHaveProperty('status', 'error');
+      expect(response.body.message.toLowerCase()).toContain('insufficient');
+    });
+
+    it('should handle multiple purchases correctly', async () => {
+      // First purchase
+      await request(app)
+        .post(`/api/sweets/${testSweet.id}/purchase`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ quantity: 30 })
+        .expect(200);
+
+      // Second purchase
+      const response = await request(app)
+        .post(`/api/sweets/${testSweet.id}/purchase`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ quantity: 20 })
+        .expect(200);
+
+      expect(response.body.data.sweet.quantity).toBe(50); // 100 - 30 - 20
+    });
+  });
 });
 

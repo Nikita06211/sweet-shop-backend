@@ -39,3 +39,17 @@ export class UpdateSweetDto {
   @Min(0, { message: 'Quantity must be greater than or equal to 0' })
   quantity?: number;
 }
+export class PurchaseSweetDto {
+  @IsNotEmpty({ message: 'Quantity is required' })
+  @IsNumber({}, { message: 'Quantity must be a number' })
+  @Min(1, { message: 'Quantity must be at least 1' })
+  quantity: number;
+}
+
+export class RestockSweetDto {
+  @IsNotEmpty({ message: 'Quantity is required' })
+  @IsNumber({}, { message: 'Quantity must be a number' })
+  @Min(1, { message: 'Quantity must be at least 1' })
+  quantity: number;
+}
+
