@@ -6,7 +6,7 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
   } from 'typeorm';
-  import { IsNotEmpty, IsNumber, IsString, Min } from 'class-validator';
+  import { IsNotEmpty, IsNumber, IsString, Min, IsOptional, IsUrl } from 'class-validator';
   
   @Entity('sweets')
   export class Sweet {
@@ -32,6 +32,11 @@ import {
     @IsNumber()
     @Min(0)
     quantity: number;
+  
+    @Column({ nullable: true })
+    @IsOptional()
+    @IsUrl({}, { message: 'Image URL must be a valid URL' })
+    imageUrl?: string;
   
     @CreateDateColumn()
     createdAt: Date;

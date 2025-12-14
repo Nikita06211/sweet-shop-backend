@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString, Min, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, Min, IsOptional, IsUrl } from 'class-validator';
 
 export class CreateSweetDto {
   @IsNotEmpty({ message: 'Name is required' })
@@ -18,6 +18,10 @@ export class CreateSweetDto {
   @IsNumber({}, { message: 'Quantity must be a number' })
   @Min(0, { message: 'Quantity must be greater than or equal to 0' })
   quantity: number;
+
+  @IsOptional()
+  @IsUrl({}, { message: 'Image URL must be a valid URL' })
+  imageUrl?: string;
 }
 
 export class UpdateSweetDto {
@@ -38,6 +42,10 @@ export class UpdateSweetDto {
   @IsNumber({}, { message: 'Quantity must be a number' })
   @Min(0, { message: 'Quantity must be greater than or equal to 0' })
   quantity?: number;
+
+  @IsOptional()
+  @IsUrl({}, { message: 'Image URL must be a valid URL' })
+  imageUrl?: string;
 }
 export class PurchaseSweetDto {
   @IsNotEmpty({ message: 'Quantity is required' })
