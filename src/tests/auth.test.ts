@@ -5,12 +5,8 @@ import { AppDataSource } from '../database/dataSource';
 import { User } from '../entities/User';
 
 describe('Auth API - Registration', () => {
-  afterAll(async () => {
-    // Clean up: close database connection
-    if (AppDataSource.isInitialized) {
-      await AppDataSource.destroy();
-    }
-  });
+  // Remove the afterAll here - it's already handled in setup.ts
+  // The connection should stay open for all tests
 
   beforeEach(async () => {
     // Clean up users table before each test
@@ -138,5 +134,117 @@ describe('Auth API - Registration', () => {
       expect(user?.password).not.toBe(userData.password);
       expect(user?.password.length).toBeGreaterThan(20); // bcrypt hash is long
     });
+  });
+});
+
+describe('POST /api/auth/login', () => {
+  beforeEach(async () => {
+    // Ensure database is initialized
+    if (!AppDataSource.isInitialized) {
+      await AppDataSource.initialize();
+    }
+
+    // Create a test user for login tests
+    const userRepository = AppDataSource.getRepository(User);
+    await userRepository.clear();
+    
+    // Register a user to test login
+    await request(app)
+      .post('/api/auth/register')
+      .send({
+        email: 'login@example.com',
+        password: 'password123',
+      });
+  });
+
+  it('should login successfully with valid credentials', async () => {
+    const loginData = {
+      email: 'login@example.com',
+      password: 'password123',
+    };
+
+    const response = await request(app)
+      .post('/api/auth/login')
+      .send(loginData)
+      .expect(200);
+
+    expect(response.body).toHaveProperty('status', 'success');
+    expect(response.body).toHaveProperty('message');
+    expect(response.body.data).toHaveProperty('user');
+    expect(response.body.data.user).toHaveProperty('id');
+    expect(response.body.data.user).toHaveProperty('email', loginData.email);
+    expect(response.body.data.user).not.toHaveProperty('password');
+    expect(response.body.data).toHaveProperty('token');
+    expect(typeof response.body.data.token).toBe('string');
+  });
+
+  it('should return 401 if email does not exist', async () => {
+    const loginData = {
+      email: 'nonexistent@example.com',
+      password: 'password123',
+    };
+
+    const response = await request(app)
+      .post('/api/auth/login')
+      .send(loginData)
+      .expect(401);
+
+    expect(response.body).toHaveProperty('status', 'error');
+    expect(response.body.message).toContain('Invalid credentials');
+  });
+
+  it('should return 401 if password is incorrect', async () => {
+    const loginData = {
+      email: 'login@example.com',
+      password: 'wrongpassword',
+    };
+
+    const response = await request(app)
+      .post('/api/auth/login')
+      .send(loginData)
+      .expect(401);
+
+    expect(response.body).toHaveProperty('status', 'error');
+    expect(response.body.message).toContain('Invalid credentials');
+  });
+
+  it('should return 400 if email is missing', async () => {
+    const loginData = {
+      password: 'password123',
+    };
+
+    const response = await request(app)
+      .post('/api/auth/login')
+      .send(loginData)
+      .expect(400);
+
+    expect(response.body).toHaveProperty('status', 'error');
+  });
+
+  it('should return 400 if password is missing', async () => {
+    const loginData = {
+      email: 'login@example.com',
+    };
+
+    const response = await request(app)
+      .post('/api/auth/login')
+      .send(loginData)
+      .expect(400);
+
+    expect(response.body).toHaveProperty('status', 'error');
+  });
+
+  it('should return 400 if email is invalid format', async () => {
+    const loginData = {
+      email: 'invalid-email',
+      password: 'password123',
+    };
+
+    const response = await request(app)
+      .post('/api/auth/login')
+      .send(loginData)
+      .expect(400);
+
+    expect(response.body).toHaveProperty('status', 'error');
   });
 });

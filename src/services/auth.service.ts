@@ -2,7 +2,7 @@ import { Repository } from 'typeorm';
 import bcrypt from 'bcryptjs';
 import { AppDataSource } from '../database/dataSource';
 import { User, UserRole } from '../entities/User';
-import { RegisterDto } from '../dto/auth.dto';
+import { RegisterDto, LoginDto } from '../dto/auth.dto';
 import { generateToken, JwtPayload } from '../utils/jwt.util';
 
 export class AuthService {
@@ -46,6 +46,40 @@ export class AuthService {
 
     // Remove password from user object before returning
     const { password, ...userWithoutPassword } = savedUser;
+
+    return {
+      user: userWithoutPassword as User,
+      token,
+    };
+  }
+
+  async login(loginDto: LoginDto): Promise<{ user: User; token: string }> {
+    // Find user by email
+    const user = await this.userRepository.findOne({
+      where: { email: loginDto.email },
+    });
+
+    if (!user) {
+      throw new Error('Invalid credentials');
+    }
+
+    // Compare password
+    const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
+
+    if (!isPasswordValid) {
+      throw new Error('Invalid credentials');
+    }
+
+    // Generate JWT token
+    const payload: JwtPayload = {
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    };
+    const token = generateToken(payload);
+
+    // Remove password from user object before returning
+    const { password, ...userWithoutPassword } = user;
 
     return {
       user: userWithoutPassword as User,
