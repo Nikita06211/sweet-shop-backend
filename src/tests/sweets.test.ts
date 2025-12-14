@@ -171,4 +171,78 @@ describe('Sweets API', () => {
       expect(response.body).toHaveProperty('status', 'error');
     });
   });
+
+  describe('GET /api/sweets', () => {
+    beforeEach(async () => {
+      // Create some test sweets
+      const sweetRepository = AppDataSource.getRepository(Sweet);
+      
+      const sweets = [
+        { name: 'Chocolate Bar', category: 'Chocolate', price: 2.50, quantity: 100 },
+        { name: 'Gummy Bears', category: 'Gummies', price: 1.50, quantity: 200 },
+        { name: 'Lollipop', category: 'Hard Candy', price: 0.75, quantity: 150 },
+      ];
+
+      for (const sweetData of sweets) {
+        const sweet = sweetRepository.create(sweetData);
+        await sweetRepository.save(sweet);
+      }
+    });
+
+    it('should return all sweets (authenticated user)', async () => {
+      const response = await request(app)
+        .get('/api/sweets')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('status', 'success');
+      expect(response.body.data).toHaveProperty('sweets');
+      expect(Array.isArray(response.body.data.sweets)).toBe(true);
+      expect(response.body.data.sweets.length).toBe(3);
+      expect(response.body.data.sweets[0]).toHaveProperty('id');
+      expect(response.body.data.sweets[0]).toHaveProperty('name');
+      expect(response.body.data.sweets[0]).toHaveProperty('category');
+      expect(response.body.data.sweets[0]).toHaveProperty('price');
+      expect(response.body.data.sweets[0]).toHaveProperty('quantity');
+    });
+
+    it('should return 401 if user is not authenticated', async () => {
+      const response = await request(app)
+        .get('/api/sweets')
+        .expect(401);
+
+      expect(response.body).toHaveProperty('status', 'error');
+    });
+
+    it('should return empty array when no sweets exist', async () => {
+      // Clear all sweets
+      const sweetRepository = AppDataSource.getRepository(Sweet);
+      await sweetRepository.clear();
+
+      const response = await request(app)
+        .get('/api/sweets')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(response.body.data.sweets).toEqual([]);
+      expect(response.body.data.sweets.length).toBe(0);
+    });
+
+    it('should return sweets in correct format', async () => {
+      const response = await request(app)
+        .get('/api/sweets')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      const sweet = response.body.data.sweets[0];
+      expect(sweet).toHaveProperty('id');
+      expect(sweet).toHaveProperty('name');
+      expect(sweet).toHaveProperty('category');
+      expect(sweet).toHaveProperty('price');
+      expect(sweet).toHaveProperty('quantity');
+      expect(sweet).toHaveProperty('createdAt');
+      expect(sweet).toHaveProperty('updatedAt');
+    });
+  });
 });
+

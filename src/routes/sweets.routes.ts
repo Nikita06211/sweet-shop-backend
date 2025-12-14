@@ -9,9 +9,15 @@ const sweetsController = new SweetsController();
 
 router.post(
   '/',
-  authMiddleware, // Protect route with authentication
+  authMiddleware,
   validateDto(CreateSweetDto),
   sweetsController.create
+);
+
+router.get(
+  '/',
+  authMiddleware,
+  sweetsController.getAll
 );
 
 export default router;

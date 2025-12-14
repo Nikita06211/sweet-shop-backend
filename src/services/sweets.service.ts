@@ -19,4 +19,13 @@ export class SweetsService {
 
     return savedSweet;
   }
+
+  async getAll(): Promise<Sweet[]> {
+    // Get all sweets from database
+    const sweets = await this.sweetRepository.find({
+      order: { createdAt: 'DESC' }, // Order by newest first
+    });
+
+    return sweets;
+  }
 }

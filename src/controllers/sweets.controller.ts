@@ -23,4 +23,18 @@ export class SweetsController {
       next(error);
     }
   };
+
+  getAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const sweets = await this.sweetsService.getAll();
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Sweets retrieved successfully',
+        data: { sweets },
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
