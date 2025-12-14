@@ -28,4 +28,46 @@ export class SweetsService {
 
     return sweets;
   }
+
+  async search(filters: {
+    name?: string;
+    category?: string;
+    minPrice?: number;
+    maxPrice?: number;
+  }): Promise<Sweet[]> {
+    const queryBuilder = this.sweetRepository.createQueryBuilder('sweet');
+
+    // Search by name (case-insensitive partial match)
+    if (filters.name) {
+      queryBuilder.andWhere('LOWER(sweet.name) LIKE LOWER(:name)', {
+        name: `%${filters.name}%`,
+      });
+    }
+
+    // Search by category (exact match)
+    if (filters.category) {
+      queryBuilder.andWhere('sweet.category = :category', {
+        category: filters.category,
+      });
+    }
+
+    // Search by minimum price
+    if (filters.minPrice !== undefined) {
+      queryBuilder.andWhere('sweet.price >= :minPrice', {
+        minPrice: filters.minPrice,
+      });
+    }
+
+    // Search by maximum price
+    if (filters.maxPrice !== undefined) {
+      queryBuilder.andWhere('sweet.price <= :maxPrice', {
+        maxPrice: filters.maxPrice,
+      });
+    }
+
+    // Order by newest first
+    queryBuilder.orderBy('sweet.createdAt', 'DESC');
+
+    return await queryBuilder.getMany();
+  }
 }

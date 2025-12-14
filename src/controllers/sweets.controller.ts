@@ -37,4 +37,32 @@ export class SweetsController {
       next(error);
     }
   };
+
+  search = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { name, category, minPrice, maxPrice } = req.query;
+
+      const filters: {
+        name?: string;
+        category?: string;
+        minPrice?: number;
+        maxPrice?: number;
+      } = {};
+
+      if (name) filters.name = name as string;
+      if (category) filters.category = category as string;
+      if (minPrice) filters.minPrice = parseFloat(minPrice as string);
+      if (maxPrice) filters.maxPrice = parseFloat(maxPrice as string);
+
+      const sweets = await this.sweetsService.search(filters);
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Sweets search completed successfully',
+        data: { sweets },
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

@@ -244,5 +244,138 @@ describe('Sweets API', () => {
       expect(sweet).toHaveProperty('updatedAt');
     });
   });
+
+  describe('GET /api/sweets/search', () => {
+    beforeEach(async () => {
+      // Create test sweets for search
+      const sweetRepository = AppDataSource.getRepository(Sweet);
+      await sweetRepository.clear();
+      
+      const sweets = [
+        { name: 'Chocolate Bar', category: 'Chocolate', price: 2.50, quantity: 100 },
+        { name: 'Dark Chocolate', category: 'Chocolate', price: 3.00, quantity: 50 },
+        { name: 'Gummy Bears', category: 'Gummies', price: 1.50, quantity: 200 },
+        { name: 'Gummy Worms', category: 'Gummies', price: 1.75, quantity: 150 },
+        { name: 'Lollipop', category: 'Hard Candy', price: 0.75, quantity: 300 },
+        { name: 'Candy Cane', category: 'Hard Candy', price: 1.00, quantity: 250 },
+      ];
+
+      for (const sweetData of sweets) {
+        const sweet = sweetRepository.create(sweetData);
+        await sweetRepository.save(sweet);
+      }
+    });
+
+    it('should search sweets by name (partial match)', async () => {
+      const response = await request(app)
+        .get('/api/sweets/search')
+        .query({ name: 'Chocolate' })
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('status', 'success');
+      expect(response.body.data.sweets.length).toBe(2);
+      expect(response.body.data.sweets.every((s: any) => 
+        s.name.toLowerCase().includes('chocolate')
+      )).toBe(true);
+    });
+
+    it('should search sweets by category', async () => {
+      const response = await request(app)
+        .get('/api/sweets/search')
+        .query({ category: 'Gummies' })
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('status', 'success');
+      expect(response.body.data.sweets.length).toBe(2);
+      expect(response.body.data.sweets.every((s: any) => 
+        s.category === 'Gummies'
+      )).toBe(true);
+    });
+
+    it('should search sweets by price range (min and max)', async () => {
+      const response = await request(app)
+        .get('/api/sweets/search')
+        .query({ minPrice: 1.50, maxPrice: 2.00 })
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('status', 'success');
+      expect(response.body.data.sweets.length).toBeGreaterThan(0);
+      expect(response.body.data.sweets.every((s: any) => 
+        s.price >= 1.50 && s.price <= 2.00
+      )).toBe(true);
+    });
+
+    it('should search sweets by price range (min only)', async () => {
+      const response = await request(app)
+        .get('/api/sweets/search')
+        .query({ minPrice: 2.00 })
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('status', 'success');
+      expect(response.body.data.sweets.every((s: any) => 
+        s.price >= 2.00
+      )).toBe(true);
+    });
+
+    it('should search sweets by price range (max only)', async () => {
+      const response = await request(app)
+        .get('/api/sweets/search')
+        .query({ maxPrice: 1.00 })
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('status', 'success');
+      expect(response.body.data.sweets.every((s: any) => 
+        s.price <= 1.00
+      )).toBe(true);
+    });
+
+    it('should combine multiple search criteria', async () => {
+      const response = await request(app)
+        .get('/api/sweets/search')
+        .query({ category: 'Chocolate', minPrice: 2.00 })
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('status', 'success');
+      expect(response.body.data.sweets.every((s: any) => 
+        s.category === 'Chocolate' && s.price >= 2.00
+      )).toBe(true);
+    });
+
+    it('should return empty array when no sweets match', async () => {
+      const response = await request(app)
+        .get('/api/sweets/search')
+        .query({ name: 'NonExistentSweet' })
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(response.body.data.sweets).toEqual([]);
+      expect(response.body.data.sweets.length).toBe(0);
+    });
+
+    it('should return 401 if user is not authenticated', async () => {
+      const response = await request(app)
+        .get('/api/sweets/search')
+        .query({ name: 'Chocolate' })
+        .expect(401);
+
+      expect(response.body).toHaveProperty('status', 'error');
+    });
+
+    it('should return all sweets when no search parameters provided', async () => {
+      const response = await request(app)
+        .get('/api/sweets/search')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('status', 'success');
+      expect(response.body.data.sweets.length).toBe(6);
+    });
+  });
 });
 

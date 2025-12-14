@@ -20,4 +20,10 @@ router.get(
   sweetsController.getAll
 );
 
+router.get(
+  '/search',
+  authMiddleware,
+  sweetsController.search
+);
+
 export default router;
