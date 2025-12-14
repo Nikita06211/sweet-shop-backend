@@ -2,7 +2,8 @@
 
 A full-stack Sweet Shop Management System built with Node.js, TypeScript, Express, TypeORM, and PostgreSQL (NeonDB). This project demonstrates RESTful API development, JWT authentication, role-based access control, and test-driven development (TDD) practices.
 
-**Frontend Repository:** [sweet-shop-frontend](https://github.com/Nikita06211/sweet-shop-frontend)
+**Frontend Repository:** [sweet-shop-frontend](https://github.com/Nikita06211/sweet-shop-frontend)  
+**Live Application:** [sweet-shop-frontend](https://sweet-shop-frontend-five.vercel.app/login)
 
 ## Table of Contents
 
@@ -17,8 +18,6 @@ A full-stack Sweet Shop Management System built with Node.js, TypeScript, Expres
 - [Project Structure](#project-structure)
 - [My AI Usage](#my-ai-usage)
 - [Screenshots](#screenshots)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Project Overview
 
@@ -732,37 +731,25 @@ AI was an invaluable tool in this project, acting as a pair programmer that acce
 
 ### Application Screenshots
 
-_Note: Add screenshots of your application here. Examples include:_
+#### 1. Authentication - Login Endpoint
 
-- API endpoint testing with Postman/Thunder Client
-- Test results showing passing tests
-- Database schema visualization
-- API response examples
+![Login API Response](./assets/auth-login.png)
 
-**Example Screenshot Placeholders:**
+The image shows a successful login request to `/api/auth/login` endpoint, demonstrating:
+- POST request with user credentials (email and password)
+- Successful 200 OK response
+- JWT token generation
+- User details returned in the response
 
-1. **Postman Collection Testing**
-   - [Screenshot: Postman showing successful API calls]
+#### 2. Test Results
 
-2. **Test Coverage Report**
-   - [Screenshot: Jest coverage report showing >80% coverage]
+![Test Results](./assets/tests.png)
 
-3. **Database Schema**
-   - [Screenshot: Database tables (users, sweets)]
-
-4. **API Response Examples**
-   - [Screenshot: Successful registration response]
-   - [Screenshot: Sweet list response]
-
-## Contributing
-
-This is a project submission. Contributions are welcome for learning purposes.
-
-## License
-
-ISC License
-
----
+The image displays comprehensive test execution results:
+- All 63 tests passed across 3 test suites
+- Database connection management during tests
+- Test execution time: ~169 seconds
+- Complete test coverage validation
 
 ## Additional Notes
 
@@ -772,8 +759,4 @@ ISC License
 - Database uses UUIDs for primary keys
 - All prices are stored as decimals with 2 decimal places
 - Quantity must be non-negative integers
-
-## Support
-
-For issues or questions, please open an issue in the repository or contact the maintainer.
 
