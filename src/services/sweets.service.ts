@@ -1,7 +1,7 @@
 import { Repository } from 'typeorm';
 import { AppDataSource } from '../database/dataSource';
 import { Sweet } from '../entities/Sweet';
-import { CreateSweetDto } from '../dto/sweet.dto';
+import { CreateSweetDto, UpdateSweetDto } from '../dto/sweet.dto';
 
 export class SweetsService {
   private sweetRepository: Repository<Sweet>;
@@ -69,5 +69,24 @@ export class SweetsService {
     queryBuilder.orderBy('sweet.createdAt', 'DESC');
 
     return await queryBuilder.getMany();
+  }
+
+  async update(id: string, updateSweetDto: UpdateSweetDto): Promise<Sweet> {
+    // Find the sweet
+    const sweet = await this.sweetRepository.findOne({
+      where: { id },
+    });
+
+    if (!sweet) {
+      throw new Error('Sweet not found');
+    }
+
+    // Update only provided fields
+    Object.assign(sweet, updateSweetDto);
+
+    // Save updated sweet
+    const updatedSweet = await this.sweetRepository.save(sweet);
+
+    return updatedSweet;
   }
 }

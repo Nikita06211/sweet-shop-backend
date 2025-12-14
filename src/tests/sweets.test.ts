@@ -377,5 +377,136 @@ describe('Sweets API', () => {
       expect(response.body.data.sweets.length).toBe(6);
     });
   });
+
+  describe('PUT /api/sweets/:id', () => {
+    let testSweet: Sweet;
+
+    beforeEach(async () => {
+      // Create a test sweet
+      const sweetRepository = AppDataSource.getRepository(Sweet);
+      await sweetRepository.clear();
+      
+      testSweet = sweetRepository.create({
+        name: 'Original Chocolate',
+        category: 'Chocolate',
+        price: 2.50,
+        quantity: 100,
+      });
+      await sweetRepository.save(testSweet);
+    });
+
+    it('should update sweet successfully (authenticated user)', async () => {
+      const updateData = {
+        name: 'Updated Chocolate',
+        price: 3.00,
+      };
+
+      const response = await request(app)
+        .put(`/api/sweets/${testSweet.id}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(updateData)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('status', 'success');
+      expect(response.body.data.sweet).toHaveProperty('id', testSweet.id);
+      expect(response.body.data.sweet).toHaveProperty('name', updateData.name);
+      expect(response.body.data.sweet).toHaveProperty('price', updateData.price);
+      // Category should remain unchanged
+      expect(response.body.data.sweet).toHaveProperty('category', 'Chocolate');
+    });
+
+    it('should return 401 if user is not authenticated', async () => {
+      const updateData = {
+        name: 'Updated Chocolate',
+      };
+
+      const response = await request(app)
+        .put(`/api/sweets/${testSweet.id}`)
+        .send(updateData)
+        .expect(401);
+
+      expect(response.body).toHaveProperty('status', 'error');
+    });
+
+    it('should return 404 if sweet does not exist', async () => {
+      const fakeId = '00000000-0000-0000-0000-000000000000';
+      const updateData = {
+        name: 'Updated Chocolate',
+      };
+
+      const response = await request(app)
+        .put(`/api/sweets/${fakeId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(updateData)
+        .expect(404);
+
+      expect(response.body).toHaveProperty('status', 'error');
+      expect(response.body.message).toContain('not found');
+    });
+
+    it('should return 400 if price is negative', async () => {
+      const updateData = {
+        price: -10,
+      };
+
+      const response = await request(app)
+        .put(`/api/sweets/${testSweet.id}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(updateData)
+        .expect(400);
+
+      expect(response.body).toHaveProperty('status', 'error');
+    });
+
+    it('should return 400 if quantity is negative', async () => {
+      const updateData = {
+        quantity: -10,
+      };
+
+      const response = await request(app)
+        .put(`/api/sweets/${testSweet.id}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(updateData)
+        .expect(400);
+
+      expect(response.body).toHaveProperty('status', 'error');
+    });
+
+    it('should update only provided fields (partial update)', async () => {
+      const updateData = {
+        price: 3.50,
+      };
+
+      const response = await request(app)
+        .put(`/api/sweets/${testSweet.id}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(updateData)
+        .expect(200);
+
+      expect(response.body.data.sweet.price).toBe(3.50);
+      expect(response.body.data.sweet.name).toBe('Original Chocolate'); // Unchanged
+      expect(response.body.data.sweet.category).toBe('Chocolate'); // Unchanged
+    });
+
+    it('should update all fields when all are provided', async () => {
+      const updateData = {
+        name: 'New Name',
+        category: 'New Category',
+        price: 4.00,
+        quantity: 200,
+      };
+
+      const response = await request(app)
+        .put(`/api/sweets/${testSweet.id}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(updateData)
+        .expect(200);
+
+      expect(response.body.data.sweet.name).toBe(updateData.name);
+      expect(response.body.data.sweet.category).toBe(updateData.category);
+      expect(response.body.data.sweet.price).toBe(updateData.price);
+      expect(response.body.data.sweet.quantity).toBe(updateData.quantity);
+    });
+  });
 });
 

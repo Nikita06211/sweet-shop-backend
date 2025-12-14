@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { SweetsService } from '../services/sweets.service';
-import { CreateSweetDto } from '../dto/sweet.dto';
+import { CreateSweetDto, UpdateSweetDto } from '../dto/sweet.dto';
 
 export class SweetsController {
   private sweetsService: SweetsService;
@@ -63,6 +63,29 @@ export class SweetsController {
       });
     } catch (error) {
       next(error);
+    }
+  };
+
+  update = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const updateSweetDto = req.body as UpdateSweetDto;
+      const sweet = await this.sweetsService.update(id, updateSweetDto);
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Sweet updated successfully',
+        data: { sweet },
+      });
+    } catch (error: any) {
+      if (error.message === 'Sweet not found') {
+        res.status(404).json({
+          status: 'error',
+          message: error.message,
+        });
+      } else {
+        next(error);
+      }
     }
   };
 }
