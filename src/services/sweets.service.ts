@@ -89,4 +89,18 @@ export class SweetsService {
 
     return updatedSweet;
   }
+
+  async delete(id: string): Promise<void> {
+    // Find the sweet
+    const sweet = await this.sweetRepository.findOne({
+      where: { id },
+    });
+
+    if (!sweet) {
+      throw new Error('Sweet not found');
+    }
+
+    // Delete the sweet
+    await this.sweetRepository.remove(sweet);
+  }
 }

@@ -88,4 +88,25 @@ export class SweetsController {
       }
     }
   };
+
+  delete = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { id } = req.params;
+      await this.sweetsService.delete(id);
+
+      res.status(200).json({
+        status: 'success',
+        message: 'Sweet deleted successfully',
+      });
+    } catch (error: any) {
+      if (error.message === 'Sweet not found') {
+        res.status(404).json({
+          status: 'error',
+          message: error.message,
+        });
+      } else {
+        next(error);
+      }
+    }
+  };
 }

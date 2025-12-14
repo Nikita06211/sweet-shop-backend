@@ -508,5 +508,71 @@ describe('Sweets API', () => {
       expect(response.body.data.sweet.quantity).toBe(updateData.quantity);
     });
   });
+
+  describe('DELETE /api/sweets/:id', () => {
+    let testSweet: Sweet;
+
+    beforeEach(async () => {
+      // Create a test sweet
+      const sweetRepository = AppDataSource.getRepository(Sweet);
+      await sweetRepository.clear();
+      
+      testSweet = sweetRepository.create({
+        name: 'Sweet to Delete',
+        category: 'Chocolate',
+        price: 2.50,
+        quantity: 100,
+      });
+      await sweetRepository.save(testSweet);
+    });
+
+    it('should delete sweet successfully (admin user)', async () => {
+      const response = await request(app)
+        .delete(`/api/sweets/${testSweet.id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('status', 'success');
+      expect(response.body).toHaveProperty('message');
+      expect(response.body.message).toContain('deleted');
+
+      // Verify sweet is actually deleted
+      const sweetRepository = AppDataSource.getRepository(Sweet);
+      const deletedSweet = await sweetRepository.findOne({
+        where: { id: testSweet.id },
+      });
+      expect(deletedSweet).toBeNull();
+    });
+
+    it('should return 403 if user is not admin', async () => {
+      const response = await request(app)
+        .delete(`/api/sweets/${testSweet.id}`)
+        .set('Authorization', `Bearer ${authToken}`) // Regular user token
+        .expect(403);
+
+      expect(response.body).toHaveProperty('status', 'error');
+      expect(response.body.message).toContain('Admin');
+    });
+
+    it('should return 401 if user is not authenticated', async () => {
+      const response = await request(app)
+        .delete(`/api/sweets/${testSweet.id}`)
+        .expect(401);
+
+      expect(response.body).toHaveProperty('status', 'error');
+    });
+
+    it('should return 404 if sweet does not exist', async () => {
+      const fakeId = '00000000-0000-0000-0000-000000000000';
+
+      const response = await request(app)
+        .delete(`/api/sweets/${fakeId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(404);
+
+      expect(response.body).toHaveProperty('status', 'error');
+      expect(response.body.message).toContain('not found');
+    });
+  });
 });
 
