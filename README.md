@@ -3,7 +3,7 @@
 A full-stack Sweet Shop Management System built with Node.js, TypeScript, Express, TypeORM, and PostgreSQL (NeonDB). This project demonstrates RESTful API development, JWT authentication, role-based access control, and test-driven development (TDD) practices.
 
 **Frontend Repository:** [sweet-shop-frontend](https://github.com/Nikita06211/sweet-shop-frontend)  
-**Live Application:** [sweet-shop-frontend](https://sweet-shop-frontend-five.vercel.app/login)
+**Live Application:** [sweet-shop-frontend](https://sweet-shop-frontend-five.vercel.app)
 
 ## Table of Contents
 
